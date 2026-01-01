@@ -1,80 +1,113 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("AXELBLADIS HUB | DA HOOD GOD", "BloodTheme")
+-- AXELBLADIS HUB | DA HOOD GOD MODE V9
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- PESTAÑA PRINCIPAL (COMBATE)
-local Combat = Window:NewTab("Combat")
-local CombatSection = Combat:NewSection("Advanced Combat")
+local Window = Rayfield:CreateWindow({
+   Name = "AXELBLADIS HUB | DA HOOD",
+   LoadingTitle = "Cargando AxelBladis System...",
+   LoadingSubtitle = "by AxelBladis",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "AxelHub",
+      FileName = "DaHoodConfig"
+   },
+   KeySystem = false
+})
 
-CombatSection:NewToggle("Anti-Stomp", "Evita que te rematen", function(state)
-    _G.AntiStomp = state
-    while _G.AntiStomp do
-        wait()
-        if game.Players.LocalPlayer.Character.Humanoid.Health <= 5 then
-            for _,v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
-                if v:IsA("BasePart") then v:Destroy() end
-            end
-        end
-    end
-end)
+-- PESTAÑA: COMBATE (ANTISTOMP & DESYNC)
+local CombatTab = Window:CreateTab("Combat", 4483362458)
+local CombatSection = CombatTab:CreateSection("Advanced Combat")
 
-CombatSection:NewToggle("Velocity Desync", "Te hace difícil de apuntar (Anti-Aim)", function(state)
-    _G.Desync = state
-    game:GetService("RunService").Heartbeat:Connect(function()
-        if _G.Desync then
-            local root = game.Players.LocalPlayer.Character.HumanoidRootPart
-            local oldV = root.Velocity
-            root.Velocity = Vector3.new(math.random(-500,500), math.random(-500,500), math.random(-500,500))
-            game:GetService("RunService").RenderStepped:Wait()
-            root.Velocity = oldV
-        end
-    end)
-end)
+CombatTab:CreateToggle({
+   Name = "Anti-Stomp",
+   Info = "Evita que te maten cuando estás en el suelo",
+   CurrentValue = false,
+   Flag = "AntiStomp",
+   Callback = function(Value)
+       _G.AntiStomp = Value
+       spawn(function()
+           while _G.AntiStomp do
+               task.wait()
+               if game.Players.LocalPlayer.Character.Humanoid.Health <= 5 then
+                   for _, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+                       if v:IsA("BasePart") then v:Destroy() end
+                   end
+               end
+           end
+       end)
+   end,
+})
 
--- PESTAÑA FARM & UTILS
-local Farm = Window:NewTab("Farm & Misc")
-local FarmSection = Farm:NewSection("Auto Features")
+CombatTab:CreateToggle({
+   Name = "Velocity Desync",
+   Info = "Te hace difícil de apuntar para los que usan Aimlock",
+   CurrentValue = false,
+   Flag = "Desync",
+   Callback = function(Value)
+       _G.Desync = Value
+       game:GetService("RunService").Heartbeat:Connect(function()
+           if _G.Desync then
+               local root = game.Players.LocalPlayer.Character.HumanoidRootPart
+               root.Velocity = Vector3.new(math.random(-500,500), 0, math.random(-500,500))
+           end
+       end)
+   end,
+})
 
-FarmSection:NewToggle("Cash Aura", "Recoge dinero automáticamente a tu alrededor", function(state)
-    _G.CashAura = state
-    while _G.CashAura do
-        wait(0.1)
-        for _,v in pairs(workspace.Ignored.Drop:GetChildren()) do
-            if v.Name == "MoneyDrop" and (v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 15 then
-                fireclickdetector(v.ClickDetector)
-            end
-        end
-    end
-end)
+-- PESTAÑA: WORLD (CASH AURA)
+local WorldTab = Window:CreateTab("World", 4483362458)
 
--- PESTAÑA MOVIMIENTO
-local Move = Window:NewTab("Movement")
-local MoveSection = Move:NewSection("Pro Movement")
+WorldTab:CreateToggle({
+   Name = "Cash Aura",
+   Info = "Recoge dinero automáticamente cerca de ti",
+   CurrentValue = false,
+   Flag = "CashAura",
+   Callback = function(Value)
+       _G.CashAura = Value
+       while _G.CashAura do
+           task.wait(0.1)
+           for _, v in pairs(workspace.Ignored.Drop:GetChildren()) do
+               if v.Name == "MoneyDrop" and (v.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 15 then
+                   fireclickdetector(v.ClickDetector)
+               end
+           end
+       end
+   end,
+})
 
-MoveSection:NewSlider("Fly Speed", "Velocidad de vuelo", 500, 50, function(s)
-    _G.FlySpeed = s
-end)
+-- PESTAÑA: MOVEMENT (FLY)
+local MoveTab = Window:CreateTab("Movement", 4483362458)
 
-MoveSection:NewButton("Enable Fly (X)", "Presiona X para volar", function()
-    -- Aquí se activa el sistema de vuelo con la tecla X
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/LibreHub/LibreHub/main/Fly.lua"))()
-end)
+MoveTab:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {16, 300},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Speed",
+   Callback = function(Value)
+       game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+   end,
+})
 
--- PESTAÑA TARGET
-local Target = Window:NewTab("Loop Kill")
-local TargetSection = Target:NewSection("Toxic Features")
+MoveTab:CreateButton({
+   Name = "Enable Pro Fly (Press X)",
+   Callback = function()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/LibreHub/LibreHub/main/Fly.lua"))()
+   end,
+})
 
-TargetSection:NewTextBox("Player Name", "Escribe el nombre para LoopKill", function(txt)
-    _G.TargetPlayer = txt
-end)
+-- PESTAÑA: TOXIC (LOOPKILL)
+local ToxicTab = Window:NewTab("Toxic")
+ToxicTab:CreateInput({
+   Name = "Target Name",
+   PlaceholderText = "Nombre del jugador",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+       _G.Target = Text
+   end,
+})
 
-TargetSection:NewToggle("Loop Kill Target", "Mata al jugador una y otra vez", function(state)
-    _G.LoopKill = state
-    while _G.LoopKill do
-        wait(1)
-        local p2 = game.Players:FindFirstChild(_G.TargetPlayer)
-        if p2 and p2.Character then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = p2.Character.HumanoidRootPart.CFrame
-            -- Aquí iría el disparo automático si tienes arma
-        end
-    end
-end)
+ToxicTab:CreateToggle({
+   Name = "Loopkill Target",
+   CurrentValue = false,
+   Flag
