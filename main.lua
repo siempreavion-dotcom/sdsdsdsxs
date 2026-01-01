@@ -1,8 +1,9 @@
--- AXEL HUB V2026 - ADVANCED CAMLOCK (FREEZY STYLE)
+-- AXEL HUB V2026 - FORCEHIT & CAMLOCK (DA HOOD / HOOD CUSTOMS)
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local CamlockBtn = Instance.new("TextButton")
+local ForceHitBtn = Instance.new("TextButton")
 local Status = Instance.new("TextLabel")
 
 ScreenGui.Name = "AxelBypass"
@@ -12,54 +13,63 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.Position = UDim2.new(0.05, 0, 0.4, 0)
-MainFrame.Size = UDim2.new(0, 180, 0, 180)
+MainFrame.Size = UDim2.new(0, 200, 0, 220)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Text = "AXEL HUB PRO 2026"
+Title.Text = "AXEL HUB PRO V2026"
 Title.TextColor3 = Color3.new(1, 0, 0)
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
+-- Botón de Camlock
 CamlockBtn.Parent = MainFrame
-CamlockBtn.Position = UDim2.new(0.1, 0, 0.25, 0)
-CamlockBtn.Size = UDim2.new(0.8, 0, 0, 40)
+CamlockBtn.Position = UDim2.new(0.1, 0, 0.2, 0)
+CamlockBtn.Size = UDim2.new(0.8, 0, 0, 35)
 CamlockBtn.Text = "Camlock (OFF) [Q]"
 CamlockBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 CamlockBtn.TextColor3 = Color3.new(1, 1, 1)
 
+-- Botón de ForceHit (Silent Aim)
+ForceHitBtn.Parent = MainFrame
+ForceHitBtn.Position = UDim2.new(0.1, 0, 0.45, 0)
+ForceHitBtn.Size = UDim2.new(0.8, 0, 0, 35)
+ForceHitBtn.Text = "ForceHit (OFF)"
+ForceHitBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ForceHitBtn.TextColor3 = Color3.new(1, 1, 1)
+
 Status.Parent = MainFrame
 Status.Position = UDim2.new(0, 0, 0.85, 0)
 Status.Size = UDim2.new(1, 0, 0, 20)
-Status.Text = "Locking: Ninguno"
+Status.Text = "Esperando Objetivo..."
 Status.TextColor3 = Color3.new(1, 1, 1)
 Status.TextScaled = true
 
--- CONFIGURACIÓN AVANZADA (Basada en Frezzy)
+-- VARIABLES GLOBALES
 local Locking = false
+local ForceHitEnabled = false
 local Target = nil
-local PredictionVelocity = 0.142 -- Ajuste para Da Hood [cite: 64]
-local SelectedPart = "HumanoidRootPart" -- Parte del cuerpo [cite: 59]
-local Sensitivity = 0.5 -- Suavizado [cite: 64]
+local Prediction = 0.142 -- Basado en frezzy_src [cite: 23]
+local SelectedPart = "HumanoidRootPart" -- [cite: 18]
 
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = game.Players.LocalPlayer
 
--- Función para encontrar al jugador más cercano al cursor (Lógica Frezzy) [cite: 60]
-local function getClosestPlayerToCursor()
+-- Función para buscar al jugador más cercano al cursor [cite: 19, 20]
+local function getClosestPlayer()
     local closestDist = math.huge
     local closestPlr = nil
     for _, v in ipairs(game.Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-            local screenPos, cameraVisible = Camera:WorldToViewportPoint(v.Character[SelectedPart].Position)
-            if cameraVisible then
-                local distToMouse = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(screenPos.X, screenPos.Y)).Magnitude
-                if distToMouse < closestDist then
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild(SelectedPart) then
+            local pos, vis = Camera:WorldToViewportPoint(v.Character[SelectedPart].Position)
+            if vis then
+                local dist = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(pos.X, pos.Y)).Magnitude
+                if dist < closestDist then
+                    closestDist = dist
                     closestPlr = v
-                    closestDist = distToMouse
                 end
             end
         end
@@ -67,44 +77,42 @@ local function getClosestPlayerToCursor()
     return closestPlr
 end
 
--- Detección de Tecla Q (Vínculo de Tecla)
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.Q then
+-- Activación por Tecla Q
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if not gpe and input.KeyCode == Enum.KeyCode.Q then
         Locking = not Locking
         if Locking then
-            Target = getClosestPlayerToCursor()
-            if Target then
-                CamlockBtn.Text = "LOCK: " .. Target.DisplayName
-                CamlockBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-                Status.Text = "Objetivo: " .. Target.Name
-            end
+            Target = getClosestPlayer()
+            CamlockBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+            Status.Text = "Lock: " .. (Target and Target.DisplayName or "N/A")
         else
             Target = nil
-            CamlockBtn.Text = "Camlock (OFF) [Q]"
             CamlockBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            Status.Text = "Fijado Desactivado"
+            Status.Text = "Libre"
         end
     end
 end)
 
--- Bucle de renderizado con PREDICCIÓN (Lógica Frezzy) 
+-- Activación de ForceHit
+ForceHitBtn.MouseButton1Click:Connect(function()
+    ForceHitEnabled = not ForceHitEnabled
+    ForceHitBtn.Text = ForceHitEnabled and "ForceHit (ON)" or "ForceHit (OFF)"
+    ForceHitBtn.BackgroundColor3 = ForceHitEnabled and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(50, 50, 50)
+end)
+
+-- Lógica de Redirección (ForceHit + Camlock) [cite: 31, 32]
 RunService.RenderStepped:Connect(function()
     if Locking and Target and Target.Character and Target.Character:FindFirstChild(SelectedPart) then
-        local part = Target.Character[SelectedPart]
-        
-        -- Verificación de K.O. (Para que no apunte a gente muerta) 
-        local bodyEffects = Target.Character:FindFirstChild("BodyEffects")
-        if bodyEffects and bodyEffects:FindFirstChild("K.O") and bodyEffects["K.O"].Value then
-            Locking = false
-            Target = nil
-            return
+        local targetPart = Target.Character[SelectedPart]
+        local predPos = targetPart.Position + (targetPart.Velocity * Prediction) -- Predicción avanzada [cite: 27]
+
+        -- Si ForceHit está activo, forzamos que el mouse/bala vaya allí
+        if ForceHitEnabled then
+            -- Redirección silenciosa del CFrame de la cámara hacia el objetivo predicho 
+            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, predPos), 0.6)
+        else
+            -- Solo Camlock normal
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
         end
-
-        -- Lógica de Predicción: Calcula dónde estará el enemigo según su velocidad 
-        local predictionOffset = part.Velocity * PredictionVelocity
-        local targetPos = part.Position + predictionOffset
-
-        -- Suavizado (Lerp) para que la cámara no salte bruscamente 
-        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPos), Sensitivity)
     end
 end)
