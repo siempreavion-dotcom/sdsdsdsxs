@@ -1,4 +1,4 @@
--- AXEL HUB V2026 - TECLA Q ACTIVADA
+-- AXEL HUB V2026 - CAMLOCK REFORZADO
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
@@ -36,36 +36,41 @@ Status.Text = "Presiona Q para Lockear"
 Status.TextColor3 = Color3.new(1, 1, 1)
 Status.TextScaled = true
 
--- LÓGICA DE CAMLOCK Y TECLA Q
+-- LÓGICA DE CAMLOCK REFORZADA
 local Locking = false
 local Target = nil
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 
--- Función para encontrar al más cercano
 local function getClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = math.huge
     for _, v in pairs(game.Players:GetPlayers()) do
         if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
-            local pos = workspace.CurrentCamera:WorldToViewportPoint(v.Character.Head.Position)
-            local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2)).Magnitude
-            if dist < shortestDistance then
-                shortestDistance = dist
-                closestPlayer = v
+            local pos, onScreen = Camera:WorldToViewportPoint(v.Character.Head.Position)
+            if onScreen then
+                local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+                if dist < shortestDistance then
+                    shortestDistance = dist
+                    closestPlayer = v
+                end
             end
         end
     end
     return closestPlayer
 end
 
--- Detectar la tecla Q
+-- Detección de Tecla Q
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.Q then
         Locking = not Locking
         if Locking then
             Target = getClosestPlayer()
-            CamlockBtn.Text = "Camlock (ON)"
-            CamlockBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+            if Target then
+                CamlockBtn.Text = "Lock: " .. Target.Name
+                CamlockBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+            end
         else
             Target = nil
             CamlockBtn.Text = "Camlock (OFF) [Q]"
@@ -74,9 +79,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Mantener la cámara fija
-game:GetService("RunService").RenderStepped:Connect(function()
+-- Bucle de renderizado para forzar la cámara
+RunService.RenderStepped:Connect(function()
     if Locking and Target and Target.Character and Target.Character:FindFirstChild("Head") then
-        workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, Target.Character.Head.Position)
+        -- Forzamos el CFrame de la cámara para que mire al objetivo
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, Target.Character.Head.Position)
     end
 end)
