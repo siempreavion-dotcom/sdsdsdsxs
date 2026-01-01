@@ -1,10 +1,9 @@
 -- ==========================================
--- AXELBLADIS HUB - DA HOOD SKIDO STYLE
+-- AXELBLADIS HUB - DA HOOD ULTIMATE (SKIDO STYLE)
 -- ==========================================
 
--- 1. LIMPIEZA AUTOMÁTICA (Para que no salga el cuadro pequeño)
+-- Limpieza de GUIs antiguas para que no se encimen
 if game.CoreGui:FindFirstChild("Orion") then game.CoreGui:FindFirstChild("Orion"):Destroy() end
-if game.CoreGui:FindFirstChild("AxelHub_v7") then game.CoreGui:FindFirstChild("AxelHub_v7"):Destroy() end
 
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
@@ -16,35 +15,39 @@ local Window = OrionLib:MakeWindow({
     IntroText = "AxelBladis Hub Cargando..."
 })
 
--- PESTAÑA DE COMBATE (AIMLOCK)
-local CombatTab = Window:MakeTab({
+-- PESTAÑA: COMBATE
+local Tab1 = Window:MakeTab({
 	Name = "Combat",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
 
-CombatTab:AddToggle({
-	Name = "Silent Aim / Aimlock",
+Tab1:AddToggle({
+	Name = "Aimlock / Silent Aim",
 	Default = false,
 	Callback = function(Value)
 		_G.AimEnabled = Value
-        print("Aimlock: " .. tostring(Value))
+        OrionLib:MakeNotification({
+            Name = "Status",
+            Content = "Aimlock: " .. tostring(Value),
+            Duration = 3
+        })
 	end    
 })
 
--- PESTAÑA DE MOVIMIENTO (DA HOOD)
-local MoveTab = Window:MakeTab({
+-- PESTAÑA: MOVIMIENTO (WALKSPEED)
+local Tab2 = Window:MakeTab({
 	Name = "Movement",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
 
-MoveTab:AddSlider({
+Tab2:AddSlider({
 	Name = "WalkSpeed",
 	Min = 16,
-	Max = 250,
+	Max = 200,
 	Default = 16,
-	Color = Color3.fromRGB(255,255,255),
+	Color = Color3.fromRGB(255,0,0),
 	Increment = 1,
 	ValueName = "Speed",
 	Callback = function(Value)
@@ -52,21 +55,28 @@ MoveTab:AddSlider({
 	end    
 })
 
--- PESTAÑA DE TELEPORTS
-local TPTab = Window:MakeTab({
+Tab2:AddButton({
+	Name = "Fly (Press L to Toggle Hub)",
+	Callback = function()
+        print("Sistema de vuelo listo")
+  	end    
+})
+
+-- PESTAÑA: TELEPORTES (DA HOOD)
+local Tab3 = Window:MakeTab({
 	Name = "Teleports",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
 
-TPTab:AddButton({
+Tab3:AddButton({
 	Name = "Bank",
 	Callback = function()
         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-402, 21, -356)
   	end    
 })
 
-TPTab:AddButton({
+Tab3:AddButton({
 	Name = "Gun Shop",
 	Callback = function()
         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-581, 7, -736)
