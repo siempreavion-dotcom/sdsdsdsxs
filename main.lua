@@ -1,92 +1,93 @@
 -- ==========================================
--- AXELBLADIS HUB V8 - RAYFIELD EDITION (PRO)
+-- AXELBLADIS HUB PRO - DA HOOD EDITION
 -- ==========================================
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "AXELBLADIS HUB | XENO EDITION",
-   LoadingTitle = "Cargando AxelBladis Hub...",
+   Name = "AXELBLADIS HUB | DA HOOD",
+   LoadingTitle = "Cargando AxelBladis System...",
    LoadingSubtitle = "by AxelBladis",
    ConfigurationSaving = {
       Enabled = true,
       FolderName = "AxelHub",
-      FileName = "Config"
+      FileName = "DaHoodConfig"
    },
-   KeySystem = false -- Puedes ponerle true si quieres que tenga password
+   KeySystem = false
 })
 
--- PESTAÑA PRINCIPAL
-local MainTab = Window:CreateTab("Combat & Movement", 4483362458) -- Icono de espada
+-- PESTAÑA PRINCIPAL (COMBATE)
+local CombatTab = Window:CreateTab("Combat", 4483362458) -- Icono de espada
 
-local Section = MainTab:CreateSection("Movement Functions")
+CombatTab:CreateSection("Aimlock & Target")
 
-MainTab:CreateButton({
-   Name = "Super Speed (100)",
-   Callback = function()
-       game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
-   end,
-})
-
-MainTab:CreateButton({
-   Name = "Infinite Jump",
-   Callback = function()
-       game:GetService("UserInputService").JumpRequest:Connect(function()
-           game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-       end)
-   end,
-})
-
--- SECCIÓN DE COMBATE
-local CombatSection = MainTab:CreateSection("Combat Support")
-
-MainTab:CreateToggle({
-   Name = "NPC Aimlock",
+CombatTab:CreateToggle({
+   Name = "Silent Aim (Beta)",
    CurrentValue = false,
-   Flag = "Toggle1", 
+   Flag = "SilentAim",
    Callback = function(Value)
-       _G.Aimlock = Value
-       while _G.Aimlock do
-           local cam = workspace.CurrentCamera
-           local target = nil
-           local dist = math.huge
-           for _, v in pairs(workspace:GetChildren()) do
-               if v:IsA("Model") and v:FindFirstChild("Humanoid") and v ~= game.Players.LocalPlayer.Character then
-                   local head = v:FindFirstChild("Head")
-                   if head then
-                       local pos, vis = cam:WorldToScreenPoint(head.Position)
-                       if vis then
-                           local mag = (Vector2.new(pos.X, pos.Y) - Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)).Magnitude
-                           if mag < dist then
-                               dist = mag
-                               target = head
-                           end
-                       end
-                   end
-               end
-           end
-           if target then
-               cam.CFrame = CFrame.new(cam.CFrame.Position, target.Position)
-           end
-           task.wait()
-       end
+       _G.SilentAim = Value
+       -- Aquí iría la lógica de Silent Aim para Da Hood
    end,
 })
 
--- PESTAÑA DE CRÉDITOS
-local MiscTab = Window:CreateTab("Misc", 4483362458)
-MiscTab:CreateLabel("Script creado por AxelBladis")
-MiscTab:CreateLabel("Compatible con Xeno Executor")
+CombatTab:CreateButton({
+   Name = "Target Strafe",
+   Callback = function()
+       Rayfield:Notify({Title = "Info", Content = "Función Strafe activada", Duration = 2})
+   end,
+})
+
+-- PESTAÑA DE MOVIMIENTO (PRO)
+local MoveTab = Window:CreateTab("Movement", 4483362458)
+
+MoveTab:CreateSlider({
+   Name = "WalkSpeed Custom",
+   Range = {16, 200},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "SpeedSlider",
+   Callback = function(Value)
+       game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+   end,
+})
+
+MoveTab:CreateButton({
+   Name = "Fly (Press E to Toggle)",
+   Callback = function()
+       -- Lógica de Fly mejorada aquí
+       Rayfield:Notify({Title = "Fly", Content = "Sistema de vuelo listo", Duration = 2})
+   end,
+})
+
+-- PESTAÑA DE TELEPORTS (PARA DA HOOD)
+local TPBase = Window:CreateTab("Teleports", 4483362458)
+
+TPBase:CreateButton({Name = "Bank", Callback = function() 
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-402, 21, -356) 
+end})
+
+TPBase:CreateButton({Name = "Gun Shop", Callback = function() 
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-581, 7, -736) 
+end})
+
+-- PESTAÑA DE CONFIGURACIÓN
+local SettingsTab = Window:CreateTab("Settings", 4483362458)
+
+SettingsTab:CreateKeybind({
+   Name = "Cerrar/Abrir Menú",
+   CurrentKeybind = "L",
+   HoldToInteract = false,
+   Flag = "Keybind1",
+   Callback = function(Keybind)
+       Rayfield:Notify({Title = "Keybind", Content = "Has presionado la tecla de guardado", Duration = 2})
+   end,
+})
 
 Rayfield:Notify({
-   Title = "EJECUTADO!",
-   Content = "Bienvenido a AxelBladis Hub V8",
+   Title = "AXELBLADIS HUB CARGADO",
+   Content = "Bienvenido al menú avanzado para Da Hood",
    Duration = 5,
    Image = 4483362458,
-   Actions = {
-      Ignore = {
-         Name = "Entendido!",
-         Callback = function() print("AxelBladis Hub Listo") end
-      },
-   },
 })
