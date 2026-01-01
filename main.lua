@@ -1,92 +1,109 @@
--- AXELBLADIS HUB | CUSTOM KEYBIND EDITION
-if game.CoreGui:FindFirstChild("Orion") then game.CoreGui:FindFirstChild("Orion"):Destroy() end
+-- AXELBLADIS HUB 2026 | ANTI-DETECTION VERSION
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({
-    Name = "AXELBLADIS HUB | DA HOOD", 
-    HidePremium = false, 
-    SaveConfig = true, 
-    ConfigFolder = "AxelDH",
-    IntroText = "Cargando Configuración de Teclas..."
+local Window = Rayfield:CreateWindow({
+   Name = "AXELBLADIS HUB | DA HOOD 2026",
+   LoadingTitle = "Iniciando Bypass 2026...",
+   LoadingSubtitle = "by AxelBladis",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "AxelHub2026"
+   },
+   KeySystem = false
 })
 
--- VARIABLES DE CONTROL
+-- VARIABLES
 local CamlockEnabled = false
 local TargetPart = "Head"
-local TargetPlayer = nil
+local CamlockKey = Enum.KeyCode.Q -- Tecla para activar el fijado
 
--- LÓGICA DEL CAMLOCK
+-- LÓGICA DE CAMLOCK PROFESIONAL
 game:GetService("RunService").RenderStepped:Connect(function()
-    if CamlockEnabled and TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild(TargetPart) then
-        local CurrentCamera = workspace.CurrentCamera
-        CurrentCamera.CFrame = CFrame.new(CurrentCamera.CFrame.Position, TargetPlayer.Character[TargetPart].Position)
+    if CamlockEnabled then
+        local Target = nil
+        local MaxDist = math.huge
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild(TargetPart) then
+                local Pos, OnScreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character[TargetPart].Position)
+                if OnScreen then
+                    local Dist = (Vector2.new(Pos.X, Pos.Y) - Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2)).Magnitude
+                    if Dist < MaxDist then
+                        MaxDist = Dist
+                        Target = v
+                    end
+                end
+            end
+        end
+        if Target then
+            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, Target.Character[TargetPart].Position)
+        end
     end
 end)
 
 -- PESTAÑA COMBATE
-local Tab1 = Window:MakeTab({Name = "Combat", Icon = "rbxassetid://4483345998"})
+local CombatTab = Window:CreateTab("Combat", 4483362458)
 
-Tab1:AddToggle({
-    Name = "Camlock",
-    Default = false,
-    Callback = function(v)
-        CamlockEnabled = v
-        if v then
-            local closestPlayer = nil
-            local shortestDistance = math.huge
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (player.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                    if distance < shortestDistance then
-                        closestPlayer = player
-                        shortestDistance = distance
-                    end
-                end
-            end
-            TargetPlayer = closestPlayer
-        else
-            TargetPlayer = nil
-        end
-    end    
+CombatTab:CreateToggle({
+   Name = "Camlock (Auto-Target)",
+   CurrentValue = false,
+   Callback = function(Value)
+      CamlockEnabled = Value
+   end,
 })
 
--- PESTAÑA CONFIGURACIÓN (AQUÍ CAMBIAS LA TECLA)
-local TabSet = Window:MakeTab({Name = "Settings", Icon = "rbxassetid://4483345998"})
-
-TabSet:AddBind({
-	Name = "Abrir/Cerrar Menú",
-	Default = Enum.KeyCode.L, -- Tecla por defecto
-	Hold = false,
-	Callback = function()
-		-- Esta función alterna la visibilidad del menú
-        local gui = game.CoreGui:FindFirstChild("Orion")
-        if gui then
-            gui.Enabled = not gui.Enabled
-        end
-	end    
+CombatTab:CreateDropdown({
+   Name = "Target Part",
+   Options = {"Head", "UpperTorso", "HumanoidRootPart"},
+   CurrentOption = "Head",
+   Callback = function(Option)
+      TargetPart = Option
+   end,
 })
 
-TabSet:AddButton({
-	Name = "Destruir Script",
-	Callback = function()
-        OrionLib:Destroy()
-	end    
+-- PESTAÑA AJUSTES (AQUÍ CAMBIAS LA TECLA DEL MENÚ)
+local SettingsTab = Window:CreateTab("Settings", 4483362458)
+
+SettingsTab:CreateKeybind({
+   Name = "Cerrar/Abrir Menú",
+   CurrentKeybind = "L", -- Tecla inicial
+   HoldToInteract = false,
+   Callback = function(Keybind)
+      Rayfield:ToggleUI() -- Esta función oculta o muestra el HUB
+   end,
 })
 
--- PESTAÑA DEFENSA
-local Tab2 = Window:MakeTab({Name = "Defense", Icon = "rbxassetid://4483345998"})
+-- PESTAÑA DEFENSA (DA HOOD)
+local DefenseTab = Window:CreateTab("Defense", 4483362458)
 
-Tab2:AddToggle({
-    Name = "Anti-Stomp",
-    Default = false,
-    Callback = function(v)
-        _G.AntiStomp = v
-        while _G.AntiStomp do task.wait()
-            if game.Players.LocalPlayer.Character.Humanoid.Health <= 5 then
-                game.Players.LocalPlayer.Character:BreakJoints()
-            end
-        end
-    end    
+DefenseTab:CreateToggle({
+   Name = "Anti-Stomp (Fast Mode)",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AntiStomp = Value
+      while _G.AntiStomp do
+          task.wait()
+          if game.Players.LocalPlayer.Character.Humanoid.Health <= 5 then
+              game.Players.LocalPlayer.Character:BreakJoints()
+          end
+      end
+   end,
 })
 
-OrionLib:Init()
+DefenseTab:CreateToggle({
+   Name = "Auto-Armor 2026",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoArmor = Value
+      while _G.AutoArmor do
+          task.wait(1)
+          if game.Players.LocalPlayer.Character.BodyEffects.Armor.Value < 10 then
+              local oldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+              game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-607, 7, -788)
+              task.wait(0.5)
+              fireclickdetector(workspace.Ignored.Shop["[Armor] - $529"].ClickDetector)
+              task.wait(0.5)
+              game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = oldPos
+          end
+      end
+   end,
+})
