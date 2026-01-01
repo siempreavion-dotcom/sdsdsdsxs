@@ -110,4 +110,15 @@ ToxicTab:CreateInput({
 ToxicTab:CreateToggle({
    Name = "Loopkill Target",
    CurrentValue = false,
-   Flag
+   Flag = "Loopkill",
+   Callback = function(Value)
+       _G.Loopkill = Value
+       while _G.Loopkill do
+           task.wait()
+           local targetPlayer = game.Players:FindFirstChild(_G.Target)
+           if targetPlayer and targetPlayer.Character then
+               game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+           end
+       end
+   end,
+})
