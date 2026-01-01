@@ -1,95 +1,92 @@
 -- ==========================================
--- AXELBLADIS HUB V7 - FONT FIXED & FULL
+-- AXELBLADIS HUB V8 - RAYFIELD EDITION (PRO)
 -- ==========================================
 
-local CoreGui = game:GetService("CoreGui")
-local UIS = game:GetService("UserInputService")
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- 1. Limpieza total de versiones anteriores
-for _, v in pairs(CoreGui:GetChildren()) do
-    if v.Name == "AxelHub_v6" or v.Name == "AxelHub_v7" then
-        v:Destroy()
-    end
-end
+local Window = Rayfield:CreateWindow({
+   Name = "AXELBLADIS HUB | XENO EDITION",
+   LoadingTitle = "Cargando AxelBladis Hub...",
+   LoadingSubtitle = "by AxelBladis",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "AxelHub",
+      FileName = "Config"
+   },
+   KeySystem = false -- Puedes ponerle true si quieres que tenga password
+})
 
--- 2. Creación del contenedor principal
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AxelHub_v7"
-ScreenGui.Parent = CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+-- PESTAÑA PRINCIPAL
+local MainTab = Window:CreateTab("Combat & Movement", 4483362458) -- Icono de espada
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -125)
-MainFrame.Size = UDim2.new(0, 200, 0, 250)
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.BorderSizePixel = 2
-MainFrame.BorderColor3 = Color3.fromRGB(255, 0, 0)
+local Section = MainTab:CreateSection("Movement Functions")
 
-Instance.new("UICorner", MainFrame)
+MainTab:CreateButton({
+   Name = "Super Speed (100)",
+   Callback = function()
+       game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
+   end,
+})
 
--- 3. Título corregido (Usando GothamBold)
-local Title = Instance.new("TextLabel")
-Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold -- Fuente estándar compatible
-Title.Text = "AXELBLADIS HUB"
-Title.TextColor3 = Color3.fromRGB(255, 0, 0)
-Title.TextSize = 20
-Title.ZIndex = 10
+MainTab:CreateButton({
+   Name = "Infinite Jump",
+   Callback = function()
+       game:GetService("UserInputService").JumpRequest:Connect(function()
+           game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+       end)
+   end,
+})
 
--- 4. Función de creación de botones
-local function CreateButton(txt, pos, color, callback)
-    local btn = Instance.new("TextButton")
-    btn.Parent = MainFrame
-    btn.Size = UDim2.new(0.8, 0, 0, 40)
-    btn.Position = pos
-    btn.BackgroundColor3 = color
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = txt
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 14
-    btn.ZIndex = 11
-    
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    btn.MouseButton1Click:Connect(callback)
-    return btn
-end
+-- SECCIÓN DE COMBATE
+local CombatSection = MainTab:CreateSection("Combat Support")
 
--- 5. Botones con funciones
-CreateButton("SUPER SPEED", UDim2.new(0.1, 0, 0.25, 0), Color3.fromRGB(40, 40, 40), function()
-    if game.Players.LocalPlayer.Character then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
-    end
-end)
+MainTab:CreateToggle({
+   Name = "NPC Aimlock",
+   CurrentValue = false,
+   Flag = "Toggle1", 
+   Callback = function(Value)
+       _G.Aimlock = Value
+       while _G.Aimlock do
+           local cam = workspace.CurrentCamera
+           local target = nil
+           local dist = math.huge
+           for _, v in pairs(workspace:GetChildren()) do
+               if v:IsA("Model") and v:FindFirstChild("Humanoid") and v ~= game.Players.LocalPlayer.Character then
+                   local head = v:FindFirstChild("Head")
+                   if head then
+                       local pos, vis = cam:WorldToScreenPoint(head.Position)
+                       if vis then
+                           local mag = (Vector2.new(pos.X, pos.Y) - Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)).Magnitude
+                           if mag < dist then
+                               dist = mag
+                               target = head
+                           end
+                       end
+                   end
+               end
+           end
+           if target then
+               cam.CFrame = CFrame.new(cam.CFrame.Position, target.Position)
+           end
+           task.wait()
+       end
+   end,
+})
 
-CreateButton("FLY (CLICK)", UDim2.new(0.1, 0, 0.45, 0), Color3.fromRGB(40, 40, 40), function()
-    local p = game.Players.LocalPlayer
-    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        local bv = Instance.new("BodyVelocity", hrp)
-        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        bv.Name = "AxelFlyForce"
-        task.spawn(function()
-            while bv.Parent do
-                bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * 100
-                task.wait()
-            end
-        end)
-    end
-end)
+-- PESTAÑA DE CRÉDITOS
+local MiscTab = Window:CreateTab("Misc", 4483362458)
+MiscTab:CreateLabel("Script creado por AxelBladis")
+MiscTab:CreateLabel("Compatible con Xeno Executor")
 
-CreateButton("CLOSE", UDim2.new(0.1, 0, 0.7, 0), Color3.fromRGB(100, 0, 0), function()
-    ScreenGui:Destroy()
-end)
-
--- Tecla L para ocultar
-UIS.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.L then
-        MainFrame.Visible = not MainFrame.Visible
-    end
-end)
+Rayfield:Notify({
+   Title = "EJECUTADO!",
+   Content = "Bienvenido a AxelBladis Hub V8",
+   Duration = 5,
+   Image = 4483362458,
+   Actions = {
+      Ignore = {
+         Name = "Entendido!",
+         Callback = function() print("AxelBladis Hub Listo") end
+      },
+   },
+})
