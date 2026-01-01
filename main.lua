@@ -1,26 +1,25 @@
--- AXELBLADIS HUB | DA HOOD ULTIMATE V10
+-- AXELBLADIS HUB | DA HOOD BYPASS V11
+-- Limpieza de interfaces previas
+if game.CoreGui:FindFirstChild("Orion") then game.CoreGui:FindFirstChild("Orion"):Destroy() end
+
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
 local Window = OrionLib:MakeWindow({
-    Name = "AXELBLADIS HUB | DA HOOD", 
+    Name = "AXELBLADIS HUB | DA HOOD PRO", 
     HidePremium = false, 
     SaveConfig = true, 
-    ConfigFolder = "AxelHub",
-    IntroText = "AxelBladis System Loading..."
+    ConfigFolder = "AxelDH",
+    IntroText = "Bypassing Da Hood..."
 })
 
--- PESTAÑA: COMBAT (ANTISTOMP & DESYNC)
-local CombatTab = Window:MakeTab({
-	Name = "Combat",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
+-- PESTAÑA: COMBATE (ANTISTOMP & DESYNC)
+local CombatTab = Window:MakeTab({Name = "Combat", Icon = "rbxassetid://4483345998"})
 
 CombatTab:AddToggle({
-	Name = "Anti-Stomp",
-	Default = false,
-	Callback = function(Value)
-		_G.AntiStomp = Value
+    Name = "Anti-Stomp (God Mode)",
+    Default = false,
+    Callback = function(Value)
+        _G.AntiStomp = Value
         while _G.AntiStomp do
             task.wait()
             if game.Players.LocalPlayer.Character.Humanoid.Health <= 5 then
@@ -29,35 +28,53 @@ CombatTab:AddToggle({
                 end
             end
         end
-	end    
+    end    
 })
 
 CombatTab:AddToggle({
-	Name = "Velocity Desync",
-	Default = false,
-	Callback = function(Value)
-		_G.Desync = Value
+    Name = "Velocity Desync (Anti-Aim)",
+    Default = false,
+    Callback = function(Value)
+        _G.Desync = Value
         game:GetService("RunService").Heartbeat:Connect(function()
             if _G.Desync then
                 local root = game.Players.LocalPlayer.Character.HumanoidRootPart
                 root.Velocity = Vector3.new(math.random(-500,500), 0, math.random(-500,500))
             end
         end)
-	end    
+    end    
+})
+
+-- PESTAÑA: AUTO-BUY (ARMOR)
+local ShopTab = Window:MakeTab({Name = "Auto-Buy", Icon = "rbxassetid://4483345998"})
+
+ShopTab:AddToggle({
+    Name = "Auto-Buy Armor (When Low)",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoArmor = Value
+        while _G.AutoArmor do
+            task.wait(1)
+            if game.Players.LocalPlayer.Character.BodyEffects.Armor.Value < 10 then
+                local oldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-607, 7, -788) -- Posición Armor
+                task.wait(0.5)
+                fireclickdetector(workspace.Ignored.Shop["[Armor] - $529"].ClickDetector)
+                task.wait(0.5)
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = oldPos
+            end
+        end
+    end    
 })
 
 -- PESTAÑA: WORLD (CASH AURA)
-local WorldTab = Window:MakeTab({
-	Name = "World",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
+local WorldTab = Window:MakeTab({Name = "World", Icon = "rbxassetid://4483345998"})
 
 WorldTab:AddToggle({
-	Name = "Cash Aura",
-	Default = false,
-	Callback = function(Value)
-		_G.CashAura = Value
+    Name = "Cash Aura",
+    Default = false,
+    Callback = function(Value)
+        _G.CashAura = Value
         while _G.CashAura do
             task.wait(0.1)
             for _, v in pairs(workspace.Ignored.Drop:GetChildren()) do
@@ -66,65 +83,7 @@ WorldTab:AddToggle({
                 end
             end
         end
-	end    
-})
-
--- PESTAÑA: PLAYER (FLY & SPEED)
-local PlayerTab = Window:MakeTab({
-	Name = "Player",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-
-PlayerTab:AddSlider({
-	Name = "WalkSpeed",
-	Min = 16,
-	Max = 300,
-	Default = 16,
-	Color = Color3.fromRGB(255,0,0),
-	Increment = 1,
-	ValueName = "Speed",
-	Callback = function(Value)
-		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
-	end    
-})
-
-PlayerTab:AddButton({
-	Name = "Enable Pro Fly (X)",
-	Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/LibreHub/LibreHub/main/Fly.lua"))()
-	end    
-})
-
--- PESTAÑA: TOXIC (LOOPKILL)
-local ToxicTab = Window:MakeTab({
-	Name = "Toxic",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-
-ToxicTab:AddTextbox({
-	Name = "Target Name",
-	Default = "",
-	TextDisappear = false,
-	Callback = function(Value)
-		_G.Target = Value
-	end
-})
-
-ToxicTab:AddToggle({
-	Name = "Loopkill Target",
-	Default = false,
-	Callback = function(Value)
-		_G.LoopKill = Value
-        while _G.LoopKill do
-            task.wait()
-            local targetPlayer = game.Players:FindFirstChild(_G.Target)
-            if targetPlayer and targetPlayer.Character then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
-            end
-        end
-	end    
+    end    
 })
 
 OrionLib:Init()
